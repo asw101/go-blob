@@ -30,8 +30,8 @@ Run docker image on your local machine with an account key provided by `az stora
 ```bash
 RESOURCE_GROUP='220600-keda'
 export AZURE_STORAGE_ACCOUNT_NAME="$(az storage account list \
-    -g $RESOURCE_GROUP 
-    --out tsv 
+    -g $RESOURCE_GROUP \
+    --out tsv \
     --query '[0].name')"
 
 export AZURE_STORAGE_PRIMARY_ACCOUNT_KEY=$(az storage account keys list \
