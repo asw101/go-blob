@@ -6,8 +6,10 @@ Run locally with a pre-existing Azure Blob Storage account.
 
 ```bash
 RESOURCE_GROUP='220600-keda'
-# export AZURE_STORAGE_CONTAINER_NAME='mycontainer' (optional)
+
 export AZURE_STORAGE_ACCOUNT_NAME="$(az storage account list -g $RESOURCE_GROUP -o tsv --query '[0].name')"
+
+# export AZURE_STORAGE_CONTAINER_NAME='mycontainer' (optional)
 
 go run .
 ```
@@ -29,6 +31,7 @@ Run docker image on your local machine with an account key provided by `az stora
 
 ```bash
 RESOURCE_GROUP='220600-keda'
+
 export AZURE_STORAGE_ACCOUNT_NAME="$(az storage account list \
     -g $RESOURCE_GROUP \
     --out tsv \
