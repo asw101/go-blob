@@ -25,20 +25,19 @@ az role assignment create \
     --scope "$STORAGE_ACCOUNT_ID"
 ```
 
-Run docker image on local machine with an Azure Service Principal and [EnvironmentCredential](https://docs.microsoft.com/en-us/azure/developer/go/azure-sdk-authentication?tabs=bash#-option-1-define-environment-variables). This is because the Azure CLI is not available within the container.
+Run docker image on your local machine with an account key provided by `az storage account keys list` and [azblob.NewSharedKeyCredential](https://pkg.go.dev/github.com/Azure/azure-storage-blob-go/azblob#hdr-Credentials). This is because the Azure CLI is not available within the container. Alternatively, you can also use an Azure Service Principal and [EnvironmentCredential](https://docs.microsoft.com/en-us/azure/developer/go/azure-sdk-authentication?tabs=bash#-option-1-define-environment-variables). 
 
 ```bash
 RESOURCE_GROUP='220600-keda'
 export AZURE_STORAGE_ACCOUNT_NAME="$(az storage account list -g $RESOURCE_GROUP -o tsv --query '[0].name')"
 
-export AZURE_TENANT_ID="<active_directory_tenant_id>"
-export AZURE_CLIENT_ID="<service_principal_appid>"
-export AZURE_CLIENT_SECRET="<service_principal_password>"
+export AZURE_STORAGE_PRIMARY_ACCOUNT_KEY=$(az storage account keys list \
+    --account-name "$AZURE_STORAGE_ACCOUNT_NAME" \
+    --out tsv \
+    --query '[0].value')
 
 docker run --rm \
     --env AZURE_STORAGE_ACCOUNT_NAME \
-    --env AZURE_TENANT_ID \
-    --env AZURE_CLIENT_ID \
-    --env AZURE_CLIENT_SECRET \
+    --env AZURE_STORAGE_PRIMARY_ACCOUNT_KEY \
     -it ghcr.io/asw101/go-blob:latest
 ```
