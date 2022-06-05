@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -47,10 +48,13 @@ func run() error {
 		return err
 	}
 
-	// list
-	err = listDownloadAndDeleteBlobs(client)
-	if err != nil {
-		return err
+	for {
+		// list
+		err = listDownloadAndDeleteBlobs(client)
+		if err != nil {
+			return err
+		}
+		time.Sleep(10 * time.Second)
 	}
 
 	return nil
@@ -71,7 +75,7 @@ func listDownloadAndDeleteBlobs(client *azblob.ContainerClient) error {
 			}
 			fmt.Printf("%s\n", b)
 			downloadBlob(client, *v.Name)
-			deleteBlob(client, *v.Name)
+			//deleteBlob(client, *v.Name)
 		}
 	}
 	if err := pager.Err(); err != nil {
