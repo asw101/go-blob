@@ -154,19 +154,45 @@ func containerClientFromEnv() (*azblob.ContainerClient, error) {
 		return nil, errors.New("AZURE_STORAGE_ACCOUNT_NAME not set")
 	}
 
+	storageAccountKey := os.Getenv("AZURE_STORAGE_PRIMARY_ACCOUNT_KEY")
+
 	containerName := os.Getenv("AZURE_STORAGE_CONTAINER_NAME")
 	if containerName == "" {
 		containerName = "mycontainer"
 	}
 
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		return nil, err
-	}
-
 	serviceURL := fmt.Sprintf("https://%s.blob.core.windows.net/", storageAccountName)
 
-	serviceClient, err := azblob.NewServiceClient(serviceURL, cred, nil)
+	getServiceClient := func() (*azblob.ServiceClient, error) {
+		if storageAccountKey != "" {
+
+			cred, err := azblob.NewSharedKeyCredential(storageAccountName, storageAccountKey)
+			if err != nil {
+				return nil, err
+			}
+
+			serviceClient, err := azblob.NewServiceClientWithSharedKey(serviceURL, cred, nil)
+			if err != nil {
+				return nil, err
+			}
+
+			return serviceClient, nil
+		}
+
+		cred, err := azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			return nil, err
+		}
+
+		serviceClient, err := azblob.NewServiceClient(serviceURL, cred, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		return serviceClient, nil
+	}
+
+	serviceClient, err := getServiceClient()
 	if err != nil {
 		return nil, err
 	}
@@ -175,5 +201,6 @@ func containerClientFromEnv() (*azblob.ContainerClient, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return containerClient, nil
 }
